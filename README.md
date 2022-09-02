@@ -49,4 +49,4 @@ This is all that is required.  By default, when this new firmware is installed t
 ### Arduino Software
 You will need to have the ESP32 Board support installed.  Create a new Arduino application and open this application file.
 When you run it on your device, it should immediately begin to loop, performing BLE Advertisement Scans, and displaying the 
-Xiaomi detected advertisements.
+Xiaomi detected advertisements in the serial monitor.
