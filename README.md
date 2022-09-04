@@ -42,7 +42,8 @@ When you open this page there are a few steps to follow:
 14. The web page will now look quite different as the new features are now displayed
 15. The only value that I have changed is the "Temperature" F or C option to display in my preferred scale
 16. Click the "Send Config" button to save this to the device
-17. You can now click the "Disconnect" button.  NOTE: When you are Connected to a device it will NOT advertise!
+17. You can now also click the "Set Time" button which wil sync the device RTC to your browser time
+18. Now click the "Disconnect" button.  NOTE: When you are Connected to a device it will NOT advertise!
 
 This is all that is required.  By default, when this new firmware is installed the device will now have a BLE name of ATC_{mac address}
 
