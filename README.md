@@ -40,7 +40,9 @@ When you open this page there are a few steps to follow:
 12. Once this is done, the device will restart and be disconnected.  You can see this in the log at the bottom of the webpage.
 13. Click the Reconnect button at the top of the web page
 14. The web page will now look quite different as the new features are now displayed
-15. The only value that I have changed is the "Temperature" F or C option to display in my preferred scale
+15. There are two values that can be changed here - one required and the other optional:
+      - Required: Advertising Type: this must be changed to PVVX (Custom) and is the packet format expacted
+      - Optional: Temperature: F or C option to display in your preferred scale
 16. Click the "Send Config" button to save this to the device
 17. You can now also click the "Set Time" button which wil sync the device RTC to your browser time
 18. Now click the "Disconnect" button.  NOTE: When you are Connected to a device it will NOT advertise!
