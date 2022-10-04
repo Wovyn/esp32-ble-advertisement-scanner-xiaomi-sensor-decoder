@@ -11,15 +11,19 @@
  *          https://pvvx.github.io/ATC_MiThermometer/TelinkMiFlasher.html
  *        This code is currently working with sensors flashed to the firmware version 3.8
  *        The sensors are configured to output the pvvx (Custom) advertisements
- *        
- *  Version 1.2
  *  
- *  Last updated 2022-09-02
+ *  Last updated 2022-10-04
  *  Written by Scott C. Lemon
  *  Based on code from:
  *        http://educ8s.tv/esp32-xiaomi-hack
  *        https://github.com/espressif/arduino-esp32/blob/master/libraries/BLE/examples/BLE_Beacon_Scanner/BLE_Beacon_Scanner.ino
  * 
+ * Version 1.3
+ *  - changed to 10 second scan
+ *  - added LED blink on scan
+ *  - fixed check for name prefix bug
+ *  - added namePrefix variable
+ *  
  **************************************************************************************/
 
 #include <sstream>
@@ -63,11 +67,13 @@
  * How long do we want to wait to collect advertisements?
  *  By default the Xiaomi sensors are sending advertisements every 2.5 seconds.
  *  This can be reconfigured in the firmware using the web tool above.
- *  When we scan for 5 seconds we ought to catch all of the sensors, but not for sure!
+ *  When we scan for 10 seconds we ought to catch all of the sensors, but not for sure!
  *  
  *  NOTE: During the scan our code is halted in the loop!
+ *  
+ *  TODO: Update the code to be non-blocking
  */
-#define SCAN_TIME  5 // seconds
+#define SCAN_TIME  10 // seconds
 
 /*
  * Do you want to see all advertisements that are detected during the scan?
@@ -81,6 +87,16 @@
  */
 boolean METRIC = false;
 
+/*
+ * The code will blink an LED to indicate when it is scanning
+ * 
+ * To blink the LED we need to know the LED Pin
+ */
+ #define LED_PIN  2
+
+/*
+ * Create the BLE Scan object
+ */
 BLEScan *pBLEScan;
 
 void IRAM_ATTR resetModule(){
@@ -88,12 +104,21 @@ void IRAM_ATTR resetModule(){
     esp_restart();
 }
 
+/*
+ * Our variables for storing the readings
+ */
 float battery_voltage = -100;
 float battery_percent = 0;
 float humidity = -100;
 float temperature = -100;
 int xiaomi_device_count = 0;
 
+/*
+ * Set this to the name prefix you want to scan for
+ *   - default for the pvvx firmware is 'ATC_'
+ */
+ const char namePrefix[]  = "ATC_";
+ 
 /**************************************************************************************
  * 
  * This is the BLE Adsvertisement callback.  It will be called as each advertisement is 
@@ -158,9 +183,9 @@ class MyAdvertisedDeviceCallbacks : public BLEAdvertisedDeviceCallbacks {
       }
 
       /*
-       *  Is this a device we are looking for with the ATC_ prefix?
+       *  Is this a device we are looking for with the namePrefix?
        */
-      if (advertisedDevice.haveName() && advertisedDevice.haveServiceData() && (advertisedDevice.getName().find('ATC_') != -1))
+      if (advertisedDevice.haveName() && advertisedDevice.haveServiceData() && (advertisedDevice.getName().find(namePrefix) != std::string::npos))
       {
           xiaomi_device_count++;
           int serviceDataCount = advertisedDevice.getServiceDataCount();
@@ -215,6 +240,8 @@ void setup() {
   
   Serial.begin(115200);
   Serial.println("ESP32 XIAOMI Mijia Model LYWSD03MMC Advertisement Monitor");
+
+  pinMode(LED_PIN, OUTPUT);     // Initialize the LED_PIN as an output
  
   initBluetooth();
 
@@ -222,22 +249,27 @@ void setup() {
 
 void loop() {
 
-    Serial.println("============================================================================");
-    Serial.printf("Starting BLE scan for %d seconds...\n", SCAN_TIME);
+  Serial.println("============================================================================");
+  Serial.printf("Starting BLE scan for %d seconds...\n", SCAN_TIME);
 
-    BLEScan* pBLEScan = BLEDevice::getScan(); //create new scan
-    pBLEScan->setAdvertisedDeviceCallbacks(new MyAdvertisedDeviceCallbacks());
-    pBLEScan->setActiveScan(true); //active scan uses more power, but get results faster
-    BLEScanResults foundDevices = pBLEScan->start(SCAN_TIME);
+  BLEScan* pBLEScan = BLEDevice::getScan(); //create new scan
+  pBLEScan->setAdvertisedDeviceCallbacks(new MyAdvertisedDeviceCallbacks());
+  pBLEScan->setActiveScan(true); //active scan uses more power, but get results faster
 
-    int count = foundDevices.getCount();
+  digitalWrite(LED_PIN, LOW);   // Turn the LED on (Note that LOW is the voltage level but actually the LED is on)
 
-    printf("\nTotal found device count : %d\n", count);
-    printf("Total Xiaomi device count: %d\n", xiaomi_device_count);
+  BLEScanResults foundDevices = pBLEScan->start(SCAN_TIME);
 
-    xiaomi_device_count = 0;
+  digitalWrite(LED_PIN, HIGH);  // Turn the LED off by making the voltage HIGH
+  
+  int count = foundDevices.getCount();
 
-    delay(100);
+  printf("\nTotal found device count : %d\n", count);
+  printf("Total Xiaomi device count: %d\n", xiaomi_device_count);
+
+  xiaomi_device_count = 0;
+
+  delay(1000);
 }
 
 void initBluetooth()
