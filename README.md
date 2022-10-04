@@ -49,6 +49,8 @@ When you open this page there are a few steps to follow:
 
 This is all that is required.  By default, when this new firmware is installed the device will now have a BLE name of ATC_{mac address}
 
+NOTE: You can also edit the name through the web interface to add your own name or name prefix.  This can make it easy to pick your devices out of all of the visible sensors.  The code supports setting a namePrefix to look for, and defaults this to 'ATC_'.
+
 ### Arduino Software
 You will need to have the ESP32 Board support installed.  Create a new Arduino application and open this application file.
 When you run it on your device, it should immediately begin to loop, performing BLE Advertisement Scans, and displaying the 
