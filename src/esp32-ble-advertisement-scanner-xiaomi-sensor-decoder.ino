@@ -17,6 +17,9 @@
  *  Based on code from:
  *        http://educ8s.tv/esp32-xiaomi-hack
  *        https://github.com/espressif/arduino-esp32/blob/master/libraries/BLE/examples/BLE_Beacon_Scanner/BLE_Beacon_Scanner.ino
+ *
+ * Version 1.4
+ *  - fix BLE decoding to use a signed short for proper negative handling 
  * 
  * Version 1.3
  *  - changed to 10 second scan
@@ -208,7 +211,8 @@ class MyAdvertisedDeviceCallbacks : public BLEAdvertisedDeviceCallbacks {
           Serial.print("    BLE Service Data:");
           Serial.println(ss.str().c_str());
 
-          unsigned long value;
+          // this is a 16-bit signed variable to handle negative temperatures, etc.
+          signed short value;
 
           // extract the temperature
           value = (cServiceData[TEMP_MSB] << 8) + cServiceData[TEMP_LSB];
